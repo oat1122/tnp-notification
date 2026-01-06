@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { config, NotificationPayload } from "../../core";
+import { config, NotificationPayload, SyncPayload } from "../../core";
 
 const notifyRoute: FastifyPluginAsync = async (fastify) => {
   // Middleware: API Key validation (production only)
@@ -42,6 +42,32 @@ const notifyRoute: FastifyPluginAsync = async (fastify) => {
     console.log(`Notification sent to ${roomName}: ${title}`);
 
     return { success: true, message: "Notification sent" };
+  });
+
+  // POST /sync - Sync notification state (unread count) จาก Laravel
+  fastify.post<{ Body: SyncPayload }>("/sync", async (request, reply) => {
+    const { user_id, unread_count } = request.body;
+
+    if (!user_id || unread_count === undefined) {
+      return reply.status(400).send({
+        success: false,
+        error: "Missing required fields: user_id, unread_count",
+      });
+    }
+
+    const roomName = `user_${user_id}`;
+    const socketsInRoom = await fastify.io.in(roomName).fetchSockets();
+    console.log(
+      `Sync to ${roomName}: unread_count=${unread_count} (${socketsInRoom.length} socket(s))`
+    );
+
+    // ส่ง sync event ไปยัง user room
+    fastify.io.to(roomName).emit("notification-sync", {
+      unread_count,
+      timestamp: new Date().toISOString(),
+    });
+
+    return { success: true, message: "Sync sent" };
   });
 };
 

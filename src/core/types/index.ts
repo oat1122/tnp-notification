@@ -14,3 +14,9 @@ export interface NotificationPayload {
   message: string;
   type?: string;
 }
+
+// Sync payload interface (for syncing notification state)
+export interface SyncPayload {
+  user_id: string;
+  unread_count: number;
+}

@@ -1,0 +1,37 @@
+โครงสร้าง Modular
+```
+src/
+├── app.ts
+├── server.ts
+│
+├── core/                    # Core functionality
+│   ├── index.ts             # Barrel export
+│   ├── config/
+│   │   └── index.ts         # Environment config
+│   └── types/
+│       └── index.ts         # TypeScript types
+│
+├── plugins/                 # Fastify plugins
+│   ├── index.ts             # Barrel export
+│   └── socket/
+│       └── index.ts         # Socket.io plugin
+│
+└── modules/                 # Feature modules
+    ├── index.ts             # Barrel export
+    ├── health/
+    │   ├── index.ts
+    │   └── health.route.ts
+    └── notify/
+        ├── index.ts
+        └── notify.route.ts
+
+```
+
+
+โครงสร้าง Modularity
+```
+example/
+ ┣ example.routes.ts
+ ┣ example.schema.ts
+ ┣ example.service.ts
+ ┗ example.types.ts
