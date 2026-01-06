@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { config } from "./core";
+import { config, logger } from "./core";
 import { socketPlugin } from "./plugins";
 import { healthRoute, notifyRoute } from "./modules";
 
@@ -9,7 +9,7 @@ import "./core/types";
 
 export const buildApp = () => {
   const app = Fastify({
-    logger: config.nodeEnv === "development",
+    loggerInstance: logger,
   });
 
   // Register Plugins
