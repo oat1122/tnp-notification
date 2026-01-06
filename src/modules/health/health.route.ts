@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { config } from "../../config";
+import { config } from "../../core";
 
 const healthRoute: FastifyPluginAsync = async (fastify) => {
   fastify.get("/", async () => {

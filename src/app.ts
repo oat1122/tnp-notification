@@ -1,12 +1,11 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import socketPlugin from "./plugins/socket";
-import healthRoute from "./routes/health";
-import notifyRoute from "./routes/notify";
-import { config } from "./config";
+import { config } from "./core";
+import { socketPlugin } from "./plugins";
+import { healthRoute, notifyRoute } from "./modules";
 
 // Import types to extend FastifyInstance
-import "./types";
+import "./core/types";
 
 export const buildApp = () => {
   const app = Fastify({

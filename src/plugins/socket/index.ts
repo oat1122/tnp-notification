@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { Server } from "socket.io";
-import { config } from "../config";
+import { config } from "../../core";
 
 export default fp(async (fastify) => {
   // Manual Socket.io integration

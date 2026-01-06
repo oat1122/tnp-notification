@@ -1,6 +1,5 @@
 import { FastifyPluginAsync } from "fastify";
-import { NotificationPayload } from "../../types";
-import { config } from "../../config";
+import { config, NotificationPayload } from "../../core";
 
 const notifyRoute: FastifyPluginAsync = async (fastify) => {
   // Middleware: API Key validation (production only)

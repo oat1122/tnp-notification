@@ -1,5 +1,5 @@
 import { buildApp } from "./app";
-import { config } from "./config";
+import { config } from "./core";
 
 const start = async () => {
   const app = buildApp();
