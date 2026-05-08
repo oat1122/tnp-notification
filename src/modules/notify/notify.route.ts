@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { config, NotificationPayload, SyncPayload } from "../../core";
+import { notifySchema, syncSchema } from "./notify.schema";
 
 const notifyRoute: FastifyPluginAsync = async (fastify) => {
   // Middleware: API Key validation (production only)
@@ -16,59 +17,60 @@ const notifyRoute: FastifyPluginAsync = async (fastify) => {
   });
 
   // POST / - รับ notification จาก Laravel
-  fastify.post<{ Body: NotificationPayload }>("/", async (request, reply) => {
-    const { user_id, title, message, type } = request.body;
+  fastify.post<{ Body: NotificationPayload }>(
+    "/",
+    { schema: notifySchema },
+    async (request) => {
+      const { user_id, title, message, type } = request.body;
+      const roomName = `user_${user_id}`;
 
-    if (!user_id || !title || !message) {
-      return reply.status(400).send({
-        success: false,
-        error: "Missing required fields: user_id, title, message",
+      if (config.nodeEnv === "development") {
+        const socketsInRoom = await fastify.io.in(roomName).fetchSockets();
+        request.log.debug(
+          { roomName, sockets: socketsInRoom.length },
+          "room socket count"
+        );
+      }
+
+      fastify.io.to(roomName).emit("notification", {
+        title,
+        message,
+        type: type || "info",
+        timestamp: new Date().toISOString(),
       });
+
+      request.log.info({ roomName, title }, "notification sent");
+
+      return { success: true, message: "Notification sent" };
     }
-
-    // Debug: Check how many sockets are in this room
-    const roomName = `user_${user_id}`;
-    const socketsInRoom = await fastify.io.in(roomName).fetchSockets();
-    console.log(`Room ${roomName} has ${socketsInRoom.length} socket(s)`);
-
-    // ส่ง notification ไปยัง user room
-    fastify.io.to(roomName).emit("notification", {
-      title,
-      message,
-      type: type || "info",
-      timestamp: new Date().toISOString(),
-    });
-
-    console.log(`Notification sent to ${roomName}: ${title}`);
-
-    return { success: true, message: "Notification sent" };
-  });
+  );
 
   // POST /sync - Sync notification state (unread count) จาก Laravel
-  fastify.post<{ Body: SyncPayload }>("/sync", async (request, reply) => {
-    const { user_id, unread_count } = request.body;
+  fastify.post<{ Body: SyncPayload }>(
+    "/sync",
+    { schema: syncSchema },
+    async (request) => {
+      const { user_id, unread_count } = request.body;
+      const roomName = `user_${user_id}`;
 
-    if (!user_id || unread_count === undefined) {
-      return reply.status(400).send({
-        success: false,
-        error: "Missing required fields: user_id, unread_count",
+      if (config.nodeEnv === "development") {
+        const socketsInRoom = await fastify.io.in(roomName).fetchSockets();
+        request.log.debug(
+          { roomName, unread_count, sockets: socketsInRoom.length },
+          "sync socket count"
+        );
+      }
+
+      fastify.io.to(roomName).emit("notification-sync", {
+        unread_count,
+        timestamp: new Date().toISOString(),
       });
+
+      request.log.info({ roomName, unread_count }, "notification sync sent");
+
+      return { success: true, message: "Sync sent" };
     }
-
-    const roomName = `user_${user_id}`;
-    const socketsInRoom = await fastify.io.in(roomName).fetchSockets();
-    console.log(
-      `Sync to ${roomName}: unread_count=${unread_count} (${socketsInRoom.length} socket(s))`
-    );
-
-    // ส่ง sync event ไปยัง user room
-    fastify.io.to(roomName).emit("notification-sync", {
-      unread_count,
-      timestamp: new Date().toISOString(),
-    });
-
-    return { success: true, message: "Sync sent" };
-  });
+  );
 };
 
 export default notifyRoute;

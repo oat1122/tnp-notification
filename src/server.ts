@@ -1,7 +1,9 @@
 import { buildApp } from "./app";
-import { config } from "./core";
+import { config, validateConfig } from "./core";
 
 const start = async () => {
+  validateConfig();
+
   const app = buildApp();
 
   try {

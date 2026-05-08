@@ -13,3 +13,7 @@ dist/
 # Logs
 *.log
 npm-debug.log*
+
+# clade
+CLAUDE.md
+.claude/

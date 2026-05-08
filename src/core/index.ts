@@ -1,4 +1,4 @@
 // Core exports
-export { config } from "./config";
+export { config, validateConfig } from "./config";
 export { logger } from "./config/logger";
 export * from "./types";

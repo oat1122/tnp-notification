@@ -7,6 +7,14 @@ declare module "fastify" {
   }
 }
 
+// Socket.io per-connection data set by the auth middleware.
+// Populated only for clients that pass HMAC verification.
+declare module "socket.io" {
+  interface SocketData {
+    userId?: string;
+  }
+}
+
 // Notification payload interface
 export interface NotificationPayload {
   user_id: string;
